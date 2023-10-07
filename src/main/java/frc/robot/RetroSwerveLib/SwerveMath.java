@@ -70,12 +70,6 @@ public class SwerveMath {
 
     //Optimization methods
 
-    //Makes target angle be between 0 and 2pi
-    public static double fixAngle(double angle) {
-        if (angle < 0) return Math.abs(angle) + Math.PI;
-        else return angle;
-    }
-
     //Finds optimal angle to move to
     public static double[] optimalAngle(double[] current, double[] target) {
         if (dotProduct(current, new double[] {target[0]*-1, target[1]*-1}) > dotProduct(current, target)) return new double[] {target[0]*-1, target[1]*-1};
@@ -92,8 +86,8 @@ public class SwerveMath {
     }
 
     //Gives the offset angle for field oriented drive
-    public static double offSet(double[] target) {
-        return (getAngle(target) + getYawInRadians())%Math.PI;
+    public static double offSet(double targetAngle) {
+        return (targetAngle + getYawInRadians())%Math.PI;
     }
 
     //Controller deadband
