@@ -36,8 +36,8 @@ public class SwerveModule {
         mPID.setP(0.75); // to be determined
         mPID.setOutputRange(-.5, .5); 
         mPID.setPositionPIDWrappingEnabled(true);
-        mPID.setPositionPIDWrappingMaxInput(Constants.encoderCountsPerRev/2);
-        mPID.setPositionPIDWrappingMinInput(-(Constants.encoderCountsPerRev/2));
+        mPID.setPositionPIDWrappingMaxInput(Constants.ENCODER_COUNTS_PER_REV/2);
+        mPID.setPositionPIDWrappingMinInput(-(Constants.ENCODER_COUNTS_PER_REV/2));
 
         // seed the motors internal encoders with the absolute position of the cancoder
         updateEncoder();
