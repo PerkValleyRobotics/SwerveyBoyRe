@@ -19,6 +19,7 @@ public class SwerveMath {
     public static double getMagnitude(double[] vector){
         return Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));
     }
+    
     //Finds the perpindicular vector to another vector
     public static double[] findPerpendicular(double[] vector){
         return new double[] {vector[1], -1 * vector[0]};
