@@ -56,7 +56,7 @@ public class SwerveSubsystem extends SubsystemBase{
 
         // if the highest speed is greater than one devide all speeds by it to avoid giving the motors a value greater than one
         double highestSpeed = SwerveMath.getHighest(speeds);
-        if(highestSpeed > 1) speeds = SwerveMath.divideAll(speeds, highestSpeed);
+        if(Math.abs(highestSpeed) > 1) speeds = SwerveMath.divideAll(speeds, highestSpeed);
         
         // set the wheel speeds 
         FRONT_RIGHT.setDriveMotor(speeds[0]);
@@ -77,9 +77,9 @@ public class SwerveSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("BR Speed", speeds[2]);
         SmartDashboard.putNumber("BL Speed", speeds[3]);
 
-        SmartDashboard.putNumber("FR Angle", SwerveMath.getAngle(FRONT_RIGHT_VECTOR));
-        SmartDashboard.putNumber("FL Angle", SwerveMath.getAngle(FRONT_LEFT_VECTOR));
-        SmartDashboard.putNumber("BR Angle", SwerveMath.getAngle(BACK_RIGHT_VECTOR));
-        SmartDashboard.putNumber("BL Angle", SwerveMath.getAngle(BACK_LEFT_VECTOR));
+        SmartDashboard.putNumber("FR Angle", SwerveMath.offSet(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)));
+        SmartDashboard.putNumber("FL Angle", SwerveMath.offSet(SwerveMath.getAngle(FRONT_LEFT_VECTOR)));
+        SmartDashboard.putNumber("BR Angle", SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
+        SmartDashboard.putNumber("BL Angle", SwerveMath.offSet(SwerveMath.getAngle(BACK_LEFT_VECTOR)));
     }
 }

@@ -14,6 +14,7 @@ package frc.robot;
  */
 public final class Constants {
   public static final int xboxPort = 0;
+  public static final double DEAD_ZONE = 0.05;
 
   public static final int FRONT_RIGHT_CANCODER = 1;
   public static final int FRONT_LEFT_CANCODER = 2;
@@ -34,5 +35,5 @@ public final class Constants {
   public static final double[] BACK_RIGHT_R = {1,-1};
   public static final double[] BACK_LEFT_R = {-1,-1};
 
-  public static final double encoderCountsPerRev = 150/7;
+  public static final double ENCODER_COUNTS_PER_REV = 150/7;
 }

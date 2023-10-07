@@ -24,7 +24,12 @@ public class RobotContainer {
   public RobotContainer() {
 
     // set the drive command as the default command 
-    swerveDrive.setDefaultCommand(new SwerveDriveCMD(swerveDrive, () -> SwerveMath.deadBand(0.05, m_driverController.getLeftX()), () -> SwerveMath.deadBand(0.05, m_driverController.getLeftY()), () -> m_driverController.getRightX(), () -> m_driverController.getRightY()));
+    swerveDrive.setDefaultCommand(new SwerveDriveCMD(swerveDrive,
+      () -> SwerveMath.deadBand(Constants.DEAD_ZONE, m_driverController.getLeftX()), 
+      () -> SwerveMath.deadBand(Constants.DEAD_ZONE, m_driverController.getLeftY()), 
+      () -> SwerveMath.deadBand(Constants.DEAD_ZONE, m_driverController.getRightX()), 
+      () -> SwerveMath.deadBand(Constants.DEAD_ZONE, m_driverController.getRightY()))
+    );
 
 
     // Configure the trigger bindings
