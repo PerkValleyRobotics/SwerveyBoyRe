@@ -26,15 +26,21 @@ public class SwerveDriveCMD extends CommandBase{
     @Override
     public void execute(){
         //turn the left joystick position into a vector
-        double[] strafeVector = {getLeftX.getAsDouble(), getLeftY.getAsDouble()};
+        // double[] strafeVector = {getLeftX.getAsDouble(), getLeftY.getAsDouble()};
 
         //turn the right joystick posion into a vector 
-        double[] targetDirection = {getRightX.getAsDouble(), getRightY.getAsDouble()};
+        // double[] targetDirection = {getRightX.getAsDouble(), getRightY.getAsDouble()};
 
         //get the angle of the right joystick vector
-        double angle = SwerveMath.getAngle(targetDirection);
+        // double angle = SwerveMath.getAngle(targetDirection);
 
         //pass the desired strafe direction vector and the target angele(in radians) into the swerveSubsystem drive method
-        swerveSubsystem.drive(strafeVector, angle);
+        // swerveSubsystem.drive(strafeVector, angle);
+
+        //hear me out
+        swerveSubsystem.drive(
+            new double[] {getLeftX.getAsDouble(), getLeftY.getAsDouble()}, 
+            SwerveMath.getAngle(new double[] {getRightX.getAsDouble(), getRightY.getAsDouble()})
+        );
     }
 }

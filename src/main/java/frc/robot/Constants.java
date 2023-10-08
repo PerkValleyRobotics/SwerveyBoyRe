@@ -36,4 +36,5 @@ public final class Constants {
   public static final double[] BACK_LEFT_R = {-1,-1};
 
   public static final double ENCODER_COUNTS_PER_REV = 150/7;
+  public static final double MAX_SPEED_DIVISOR = 4;
 }

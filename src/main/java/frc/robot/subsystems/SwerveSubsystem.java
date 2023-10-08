@@ -24,16 +24,16 @@ public class SwerveSubsystem extends SubsystemBase{
         this.BACK_LEFT = new SwerveModule(Constants.BACK_LEFT_DRIVE, Constants.BACK_LEFT_DIRECTION, Constants.BACK_LEFT_CANCODER);
 
         // initialize the PID controller for the turn speed calculation
-        pidController = new PIDController(0, 0, 0); // correct constant values need to be determined 
+        pidController = new PIDController(0.5, 0, 0); // correct constant values need to be determined 
     }
 
     //Drive
     private double omega;
 
-    private double[] FRONT_RIGHT_VECTOR = new double[3];
-    private double[] FRONT_LEFT_VECTOR = new double[3];
-    private double[] BACK_RIGHT_VECTOR = new double[3];
-    private double[] BACK_LEFT_VECTOR = new double[3];
+    private double[] FRONT_RIGHT_VECTOR = new double[2];
+    private double[] FRONT_LEFT_VECTOR = new double[2];
+    private double[] BACK_RIGHT_VECTOR = new double[2];
+    private double[] BACK_LEFT_VECTOR = new double[2];
 
     private double[] speeds = new double[4];
 
@@ -49,33 +49,26 @@ public class SwerveSubsystem extends SubsystemBase{
         BACK_LEFT_VECTOR = SwerveMath.addVectors(SwerveMath.optimalAngle(BACK_LEFT_VECTOR, strafeVector),  SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.BACK_LEFT_R), omega));
 
         // determine the speed of each wheel from the magnitude of each vector
-        if (strafeVector[0] != 0 && strafeVector[1] != 0) {
-            speeds[0] = (SwerveMath.getMagnitude(FRONT_RIGHT_VECTOR)/4);//*SwerveMath.cosScaling(FRONT_RIGHT_VECTOR, new double[] {Math.cos(FRONT_RIGHT.getEncoder())*speeds[0], Math.sin(FRONT_RIGHT.getEncoder())*speeds[0]}); //SwerveMath.getMagnitude(FRONT_RIGHT_VECTOR)/4;
-            speeds[1] = (SwerveMath.getMagnitude(FRONT_LEFT_VECTOR)/4);//*SwerveMath.cosScaling(FRONT_LEFT_VECTOR, new double[] {Math.cos(FRONT_LEFT.getEncoder())*speeds[1], Math.sin(FRONT_RIGHT.getEncoder())*speeds[1]});//SwerveMath.getMagnitude(FRONT_LEFT_VECTOR)/4;
-            speeds[2] = (SwerveMath.getMagnitude(BACK_RIGHT_VECTOR)/4);//*SwerveMath.cosScaling(BACK_RIGHT_VECTOR, new double[] {Math.cos(BACK_RIGHT.getEncoder())*speeds[2], Math.sin(FRONT_RIGHT.getEncoder())*speeds[2]});//SwerveMath.getMagnitude(BACK_RIGHT_VECTOR)/4;
-            speeds[3] = (SwerveMath.getMagnitude(BACK_LEFT_VECTOR)/4);//*SwerveMath.cosScaling(BACK_LEFT_VECTOR, new double[] {Math.cos(BACK_LEFT.getEncoder())*speeds[3], Math.sin(FRONT_RIGHT.getEncoder())*speeds[3]});//SwerveMath.getMagnitude(BACK_LEFT_VECTOR)/4;
-        }
-        else {
-            speeds[0] = 0; 
-            speeds[1] = 0; 
-            speeds[2] = 0; 
-            speeds[3] = 0;
-        }
+        speeds[0] = (SwerveMath.getMagnitude(FRONT_RIGHT_VECTOR))*SwerveMath.cosScaling(FRONT_RIGHT_VECTOR, new double[] {Math.cos(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0])});
+        speeds[1] = (SwerveMath.getMagnitude(FRONT_LEFT_VECTOR))*SwerveMath.cosScaling(FRONT_LEFT_VECTOR, new double[] {Math.cos(FRONT_LEFT.getEncoder())*Math.abs(speeds[1]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[1])});
+        speeds[2] = (SwerveMath.getMagnitude(BACK_RIGHT_VECTOR))*SwerveMath.cosScaling(BACK_RIGHT_VECTOR, new double[] {Math.cos(BACK_RIGHT.getEncoder())*Math.abs(speeds[2]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[2])});
+        speeds[3] = (SwerveMath.getMagnitude(BACK_LEFT_VECTOR))*SwerveMath.cosScaling(BACK_LEFT_VECTOR, new double[] {Math.cos(BACK_LEFT.getEncoder())*Math.abs(speeds[3]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[3])});
+
         // if the highest speed is greater than one devide all speeds by it to avoid giving the motors a value greater than one
-        double highestSpeed = SwerveMath.getHighest(speeds);
+        double highestSpeed = Math.abs(SwerveMath.getHighest(speeds));
         if(Math.abs(highestSpeed) > 1) speeds = SwerveMath.divideAll(speeds, highestSpeed);
         
         // set the wheel speeds 
-        FRONT_RIGHT.setDriveMotor(speeds[0]);
-        FRONT_LEFT.setDriveMotor(speeds[1]);
-        BACK_RIGHT.setDriveMotor(speeds[2]);
-        BACK_LEFT.setDriveMotor(speeds[3]);
+        FRONT_RIGHT.setDriveMotor(speeds[0]/Constants.MAX_SPEED_DIVISOR);
+        FRONT_LEFT.setDriveMotor(speeds[1]/Constants.MAX_SPEED_DIVISOR);
+        BACK_RIGHT.setDriveMotor(speeds[2]/Constants.MAX_SPEED_DIVISOR);
+        BACK_LEFT.setDriveMotor(speeds[3]/Constants.MAX_SPEED_DIVISOR);
 
         // set the wheel angles and subtract from them the current robot yaw in order to maintain field centric driving
-        FRONT_RIGHT.setDirectionMotor(SwerveMath.offSet(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)));
-        FRONT_LEFT.setDirectionMotor(SwerveMath.getAngle(FRONT_LEFT_VECTOR));
-        BACK_RIGHT.setDirectionMotor(SwerveMath.getAngle(BACK_RIGHT_VECTOR));
-        BACK_LEFT.setDirectionMotor(SwerveMath.getAngle(BACK_LEFT_VECTOR));
+        FRONT_RIGHT.setDirectionMotor(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)); // SwerveMath.offSet(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)));
+        FRONT_LEFT.setDirectionMotor(SwerveMath.getAngle(FRONT_LEFT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(FRONT_LEFT_VECTOR)));
+        BACK_RIGHT.setDirectionMotor(SwerveMath.getAngle(BACK_RIGHT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
+        BACK_LEFT.setDirectionMotor(SwerveMath.getAngle(BACK_LEFT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
 
 
         //Smart dashboard for testing

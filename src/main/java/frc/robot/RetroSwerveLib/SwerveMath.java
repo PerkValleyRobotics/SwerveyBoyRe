@@ -34,7 +34,9 @@ public class SwerveMath {
 
     //Scales the speed values of the motors so they do not fight eachother
     public static double cosScaling(double[] targetVector, double[] currentVector) {
-        return (dotProduct(targetVector, currentVector))/(getMagnitude(targetVector)*getMagnitude(currentVector));
+        double magnitudes = getMagnitude(targetVector)*getMagnitude(currentVector);
+        if (magnitudes != 0) return (dotProduct(targetVector, currentVector))/magnitudes;
+        return 1;
     }
 
     //Puts a vector's values in the range of -1 to 1
@@ -80,10 +82,11 @@ public class SwerveMath {
     //Field oriented
 
     //NavX
-    // return the current yaw according to the navx in radians rather than degrees 
     private final static AHRS navx = new AHRS();
+
+    // return the current yaw according to the navx in radians rather than degrees 
     public static double getYawInRadians(){
-        return Math.round(navx.getYaw() * (180/Math.PI));
+        return (Math.round((navx.getYaw()%180 * (Math.PI/180))*10)/10);
     }
 
     //Gives the offset angle for field oriented drive

@@ -27,7 +27,7 @@ public class SwerveModule {
         // initialize the encoders 
         // this.CAN_Coder = new WPI_CANCoder(CAN_Coder);
         this.encoder = this.DIRECTION_MOTOR.getEncoder();
-        this.encoder.setPositionConversionFactor(2*Math.PI/Constants.ENCODER_COUNTS_PER_REV);
+        this.encoder.setPositionConversionFactor((2*Math.PI)/(Constants.ENCODER_COUNTS_PER_REV));
 
         // initalizer the direction pid
         this.mPID = this.DIRECTION_MOTOR.getPIDController();
