@@ -43,7 +43,6 @@ public class SwerveModule {
         updateEncoder();
     }
 
-
     //Controls the motors
 
     // set the speed of the drive motor

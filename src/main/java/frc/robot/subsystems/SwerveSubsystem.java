@@ -70,7 +70,6 @@ public class SwerveSubsystem extends SubsystemBase{
         BACK_RIGHT.setDirectionMotor(SwerveMath.getAngle(BACK_RIGHT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
         BACK_LEFT.setDirectionMotor(SwerveMath.getAngle(BACK_LEFT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
 
-
         //Smart dashboard for testing
         SmartDashboard.putNumber("FR Speed", speeds[0]);
         SmartDashboard.putNumber("FL Speed", speeds[1]);
