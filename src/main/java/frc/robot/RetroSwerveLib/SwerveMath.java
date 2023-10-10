@@ -73,8 +73,8 @@ public class SwerveMath {
 
     //Optimization methods
 
-    //Finds optimal angle to move to
-    public static double[] optimalAngle(double[] current, double[] target) {
+    //Finds optimal vector to move to
+    public static double[] optimalVector(double[] current, double[] target) {
         if (dotProduct(current, new double[] {target[0]*-1, target[1]*-1}) > dotProduct(current, target)) return new double[] {target[0]*-1, target[1]*-1};
         return target;
     }

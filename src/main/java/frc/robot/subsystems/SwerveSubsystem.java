@@ -17,6 +17,7 @@ public class SwerveSubsystem extends SubsystemBase{
     private final PIDController pidController;
 
     public SwerveSubsystem() {
+
         // initialize the swerve modules 
         this.FRONT_RIGHT = new SwerveModule(Constants.FRONT_RIGHT_DRIVE, Constants.FRONT_RIGHT_DIRECTION, Constants.FRONT_RIGHT_CANCODER);
         this.FRONT_LEFT = new SwerveModule(Constants.FRONT_LEFT_DRIVE, Constants.FRONT_LEFT_DIRECTION, Constants.FRONT_LEFT_CANCODER);
@@ -35,6 +36,7 @@ public class SwerveSubsystem extends SubsystemBase{
     private double[] BACK_RIGHT_VECTOR = new double[2];
     private double[] BACK_LEFT_VECTOR = new double[2];
 
+    private double[][] currentVectors = new double[4][2];
     private double[] speeds = new double[4];
 
     public void drive(double[] strafeVector, double angle){
@@ -42,33 +44,64 @@ public class SwerveSubsystem extends SubsystemBase{
         // calculate the appropriate radians per second to reach the desired angle
         omega = pidController.calculate(SwerveMath.getYawInRadians(), angle);
 
-        // determine the sum of the strafe vecors with the turning vectors for each module to go to
-        FRONT_RIGHT_VECTOR = SwerveMath.addVectors(SwerveMath.optimalAngle(FRONT_RIGHT_VECTOR, strafeVector),  SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.FRONT_RIGHT_R), omega));
-        FRONT_LEFT_VECTOR = SwerveMath.addVectors(SwerveMath.optimalAngle(FRONT_LEFT_VECTOR, strafeVector),  SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.FRONT_LEFT_R), omega));
-        BACK_RIGHT_VECTOR = SwerveMath.addVectors(SwerveMath.optimalAngle(BACK_RIGHT_VECTOR, strafeVector),  SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.BACK_RIGHT_R), omega));
-        BACK_LEFT_VECTOR = SwerveMath.addVectors(SwerveMath.optimalAngle(BACK_LEFT_VECTOR, strafeVector),  SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.BACK_LEFT_R), omega));
+        /*
+         * The vectors being set are the new target vectors for each swerve module
+         * 
+         * strafeVector is the target direction for the robot to move in
+         * 
+         * The perpindicular vector to the vectors representing the distance of each swerve module's distance from the center of the frame 
+         * are multiplied by omega; omega is the scalar unit representing rotational velocity
+         * 
+         * After above mentioned calculations, the two resulting vectors are added together for each module in order to get the new target vectors
+         */
+        FRONT_RIGHT_VECTOR = SwerveMath.addVectors(strafeVector, SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.FRONT_RIGHT_R), omega));
+        FRONT_LEFT_VECTOR = SwerveMath.addVectors(strafeVector, SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.FRONT_LEFT_R), omega));
+        BACK_RIGHT_VECTOR = SwerveMath.addVectors(strafeVector, SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.BACK_RIGHT_R), omega));
+        BACK_LEFT_VECTOR = SwerveMath.addVectors(strafeVector, SwerveMath.multByScalar(SwerveMath.findPerpendicular(Constants.BACK_LEFT_R), omega));
 
-        // determine the speed of each wheel from the magnitude of each vector
-        speeds[0] = (SwerveMath.getMagnitude(FRONT_RIGHT_VECTOR))*SwerveMath.cosScaling(FRONT_RIGHT_VECTOR, new double[] {Math.cos(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0])});
-        speeds[1] = (SwerveMath.getMagnitude(FRONT_LEFT_VECTOR))*SwerveMath.cosScaling(FRONT_LEFT_VECTOR, new double[] {Math.cos(FRONT_LEFT.getEncoder())*Math.abs(speeds[1]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[1])});
-        speeds[2] = (SwerveMath.getMagnitude(BACK_RIGHT_VECTOR))*SwerveMath.cosScaling(BACK_RIGHT_VECTOR, new double[] {Math.cos(BACK_RIGHT.getEncoder())*Math.abs(speeds[2]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[2])});
-        speeds[3] = (SwerveMath.getMagnitude(BACK_LEFT_VECTOR))*SwerveMath.cosScaling(BACK_LEFT_VECTOR, new double[] {Math.cos(BACK_LEFT.getEncoder())*Math.abs(speeds[3]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[3])});
+        /*
+         * currentVectors[0] - front right module; currentVectors[1] - front left module;  currentVectors[2] - back right module; currentVectors[3] - back left module;
+         * 
+         * The built-in encoder of each direction motor is used to get the current angle of each module
+         * Cosine and sine of each module's angle is then multiplied by the previous set speed to get the current vector of each module
+         */
+        currentVectors[0] = new double[] {Math.cos(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0]), Math.sin(FRONT_RIGHT.getEncoder())*Math.abs(speeds[0])};
+        currentVectors[1] = new double[] {Math.cos(FRONT_LEFT.getEncoder())*Math.abs(speeds[1]), Math.sin(FRONT_LEFT.getEncoder())*Math.abs(speeds[1])};
+        currentVectors[2] = new double[] {Math.cos(BACK_RIGHT.getEncoder())*Math.abs(speeds[2]), Math.sin(BACK_RIGHT.getEncoder())*Math.abs(speeds[2])};
+        currentVectors[3] = new double[] {Math.cos(BACK_LEFT.getEncoder())*Math.abs(speeds[3]), Math.sin(BACK_LEFT.getEncoder())*Math.abs(speeds[3])};
 
-        // if the highest speed is greater than one devide all speeds by it to avoid giving the motors a value greater than one
+        /* 
+         * speed[0] - front right module; speed[1] - front left module;  speed[2] - back right module; speed[3] - back left module;
+         * 
+         * The magnitude of the target vector is multiplied by the difference in angle between the target vector and the current vector of a module
+        */
+        speeds[0] = (SwerveMath.getMagnitude(FRONT_RIGHT_VECTOR))*SwerveMath.cosScaling(FRONT_RIGHT_VECTOR, currentVectors[0]);
+        speeds[1] = (SwerveMath.getMagnitude(FRONT_LEFT_VECTOR))*SwerveMath.cosScaling(FRONT_LEFT_VECTOR, currentVectors[1]);
+        speeds[2] = (SwerveMath.getMagnitude(BACK_RIGHT_VECTOR))*SwerveMath.cosScaling(BACK_RIGHT_VECTOR, currentVectors[2]);
+        speeds[3] = (SwerveMath.getMagnitude(BACK_LEFT_VECTOR))*SwerveMath.cosScaling(BACK_LEFT_VECTOR, currentVectors[3]);
+
+        // Scales the speeds so that each motor is sent a value no greater than 1 nor less than -1
         double highestSpeed = Math.abs(SwerveMath.getHighest(speeds));
         if(Math.abs(highestSpeed) > 1) speeds = SwerveMath.divideAll(speeds, highestSpeed);
         
-        // set the wheel speeds 
+        // sets the wheel speeds to the previously calculated speeds
         FRONT_RIGHT.setDriveMotor(speeds[0]/Constants.MAX_SPEED_DIVISOR);
         FRONT_LEFT.setDriveMotor(speeds[1]/Constants.MAX_SPEED_DIVISOR);
         BACK_RIGHT.setDriveMotor(speeds[2]/Constants.MAX_SPEED_DIVISOR);
         BACK_LEFT.setDriveMotor(speeds[3]/Constants.MAX_SPEED_DIVISOR);
 
-        // set the wheel angles and subtract from them the current robot yaw in order to maintain field centric driving
-        FRONT_RIGHT.setDirectionMotor(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)); // SwerveMath.offSet(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)));
-        FRONT_LEFT.setDirectionMotor(SwerveMath.getAngle(FRONT_LEFT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(FRONT_LEFT_VECTOR)));
-        BACK_RIGHT.setDirectionMotor(SwerveMath.getAngle(BACK_RIGHT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
-        BACK_LEFT.setDirectionMotor(SwerveMath.getAngle(BACK_LEFT_VECTOR)); //SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
+        /*
+         * Sets the angles for each mosule's direction motor
+         * 
+         * A check is done to see if the current vector or the current opposite of the current vector is closest to the target varget
+         * Ensuring the module never has to turn more than 90 degrees to reach the target position
+         * 
+         * An offset is then applied based on the angle of an onboard gyroscope in order to maintain field centric driving
+         */
+        FRONT_RIGHT.setDirectionMotor(SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[0], FRONT_RIGHT_VECTOR))); 
+        FRONT_LEFT.setDirectionMotor(SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[1], FRONT_LEFT_VECTOR))); 
+        BACK_RIGHT.setDirectionMotor(SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[2], BACK_RIGHT_VECTOR))); 
+        BACK_LEFT.setDirectionMotor(SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[3], BACK_LEFT_VECTOR))); 
 
         //Smart dashboard for testing
         SmartDashboard.putNumber("FR Speed", speeds[0]);
@@ -76,10 +109,10 @@ public class SwerveSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("BR Speed", speeds[2]);
         SmartDashboard.putNumber("BL Speed", speeds[3]);
 
-        SmartDashboard.putNumber("FR Angle", SwerveMath.offSet(SwerveMath.getAngle(FRONT_RIGHT_VECTOR)));
-        SmartDashboard.putNumber("FL Angle", SwerveMath.offSet(SwerveMath.getAngle(FRONT_LEFT_VECTOR)));
-        SmartDashboard.putNumber("BR Angle", SwerveMath.offSet(SwerveMath.getAngle(BACK_RIGHT_VECTOR)));
-        SmartDashboard.putNumber("BL Angle", SwerveMath.offSet(SwerveMath.getAngle(BACK_LEFT_VECTOR)));
+        SmartDashboard.putNumber("FR Angle", SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[0], FRONT_RIGHT_VECTOR)));
+        SmartDashboard.putNumber("FL Angle", SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[1], FRONT_LEFT_VECTOR)));
+        SmartDashboard.putNumber("BR Angle", SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[2], BACK_RIGHT_VECTOR)));
+        SmartDashboard.putNumber("BL Angle", SwerveMath.getAngle(SwerveMath.optimalVector(currentVectors[3], BACK_LEFT_VECTOR)));
 
         SmartDashboard.putNumber("Angle", SwerveMath.getYawInRadians());
     }
